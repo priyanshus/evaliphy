@@ -1,30 +1,54 @@
 # Quick Start
+Get up and running with Evaliphy in minutes.
+Prerequisites
+Before you start, make sure you have:
 
-Get up and running with Evaliphy in minutes. Evaliphy is a QA-first SDK for evaluating RAG applications with the simplicity of a modern test framework.
+- Node.js 18 or higher
+- An OpenAI API key (or any OpenAI-compatible provider)
+- A running RAG application with an HTTP endpoint
 
-## 1. Initialize your project
 
-The easiest way to start is by using the Evaliphy CLI to create a recommended project structure.
+## 1. Initialise your project
+The easiest way to start is using the Evaliphy CLI. It creates a recommended project structure with everything you need.
 
 ```bash
+npm install -g evaliphy
 npx evaliphy init my-eval-project
 cd my-eval-project
+npm install
+```
+This creates the following structure:
+
+```
+my-eval-project/
+  evals/
+    example.eval.ts       — a sample evaluation to get you started
+  evaliphy.config.ts      — main configuration file
+  package.json            — project dependencies and scripts
+  tsconfig.json           — TypeScript configuration
 ```
 
-This command creates a directory with the following structure:
-- `evals/`: Directory for your evaluation files.
-- `evaliphy.config.ts`: Main configuration file.
-- `package.json`: Project dependencies and scripts.
-- `tsconfig.json`: TypeScript configuration.
+## 2. Set your API key
+Evaliphy uses an LLM to judge your RAG responses. Add your API key to your environment before running evaluations.
+```bash
+export OPENAI_API_KEY=your-api-key-here
+```
 
-## 2. Configure your environment
+Or add it to a .env file at the root of your project:
 
-Evaliphy uses an LLM as a judge to evaluate your RAG system. You'll need to configure your LLM provider in `evaliphy.config.ts`.
+`OPENAI_API_KEY=your-api-key-here`
+
+## 3. Configure Evaliphy
+Open evaliphy.config.ts and point it at your RAG application:
 
 ```typescript
-import { defineConfig } from 'evaliphy';
+import { defineConfig } from '@evaliphy/sdk';
 
 export default defineConfig({
+  http: {
+    baseUrl: 'https://api.your-rag-app.com',  // your RAG API base URL
+    timeout: 10000,
+  },
   llmAsJudgeConfig: {
     model: 'gpt-4o-mini',
     provider: {
@@ -32,53 +56,82 @@ export default defineConfig({
       apiKey: process.env.OPENAI_API_KEY,
     },
   },
-  http: {
-    baseUrl: 'https://api.your-rag-app.com',
-  },
 });
 ```
+Evaliphy uses gpt-4o-mini by default. You can use any OpenAI-compatible provider including OpenRouter, Azure OpenAI, or a local model.
 
-## 3. Write your first evaluation
-
-Create a file named `evals/basic.eval.ts`:
-
+4. Write your first evaluation
+Open evals/example.eval.ts and replace the contents with a real evaluation against your RAG API:
 ```typescript
 import { evaluate, expect } from 'evaliphy';
 
-evaluate('Greeting Evaluation', async ({ httpClient }) => {
-  const query = "Hello, how can you help me today?";
-  
-  // 1. Call your RAG application
+evaluate('answer quality', async ({ httpClient }) => {
+  const query = 'What is your refund policy?';
+
+  // 1. call your RAG application
   const response = await httpClient.post('/chat', { message: query });
   const { answer, context } = await response.json();
 
-  // 2. Assert on the output
+  // 2. assert the response is relevant to the query
   await expect({
     query,
     response: answer,
-    context: context
+    context,
   }).toBeRelevant();
-  
+
+  // 3. assert the response is faithful to the retrieved context
   await expect({
     query,
     response: answer,
-    context: context
-  }).toBeFaithful();
+    context,
+  }).toBeFaithful({threshold: 0.8});
 });
+
 ```
+What each assertion checks:
 
-## 4. Run the evaluation
+toBeRelevant() — does the response actually address the query
+toBeFaithful() — does the response stay grounded in the retrieved context without hallucinating
 
-Execute your evaluations using the CLI:
 
-```bash
+5. Run your evaluations
+```bash 
 npm test
 ```
 
-Or directly via npx:
-
+Or directly via the CLI:
 ```bash
 npx evaliphy eval
 ```
+Evaliphy will:
 
-Evaliphy will discover all `.eval.ts` files in your `evals` directory, execute them, and generate a report.
+Discover all .eval.ts files in your evals directory
+Call your RAG API for each evaluation
+Score each response using the built-in LLM judge
+Print results to the console
+Write a full report to the report/ directory
+
+
+What a passing run looks like
+```bash  
+  ✓  answer quality — toBeRelevant    (score: 0.91)
+  ✓  answer quality — toBeFaithful    (score: 0.87)
+
+  2 passed, 0 failed
+  Report written to report/report-[runId].json
+What a failing run looks like
+bash  ✓  answer quality — toBeRelevant    (score: 0.91)
+  ✗  answer quality — toBeFaithful    (score: 0.52)
+       The response introduces information not found in the retrieved context.
+
+  1 passed, 1 failed
+  Report written to results/evaliphy-run-20240402.json
+```
+
+When an assertion fails, Evaliphy tells you the score, the threshold it was measured against, and the judge's reasoning in plain English — so you know exactly what to fix.
+
+## Next steps
+Add more evaluations covering different queries and edge cases
+Explore the full assertion library — toBeGrounded, toBeCoherent, and more
+Set up CI integration to catch regressions automatically on every deploy
+Customise thresholds and models per assertion if your use case needs it

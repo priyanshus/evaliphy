@@ -1,158 +1,113 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
+import { CodeBlock } from "./components/CodeBlock";
 
-export default function Home() {
+const exampleCode = `import { evaluate, expect } from 'evaliphy';
+
+const sample = {
+  query: "What is the return policy?",
+  expectedContext: "Items can be returned within 30 days."
+};
+
+evaluate("Return Policy Chat", async ({ httpClient }) => {
+  // 1. Hit your RAG endpoint
+  const res = await httpClient.post('/api/chat', { message: sample.query });
+  const data = await res.json();
+
+  // 2. Assert in plain English
+  await expect({
+    query: sample.query,
+    response: data.answer,
+    context: data.retrieved_chunks
+  }).toBeFaithful();
+
+  await expect({
+    query: sample.query,
+    response: data.answer,
+    context: data.retrieved_chunks
+  }).toBeRelevant({threshold:0.7});
+});`;
+
+export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-24 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col items-center text-center space-y-8">
-          <div className="inline-flex items-center rounded-full border border-zinc-100 bg-zinc-50 px-3 py-1 text-sm font-medium text-zinc-600">
-            🚀 Evaliphy Beta is now live
-            <Link
-              href="/docs/introduction"
-              className="ml-1 text-zinc-900 hover:underline"
-            >
-              Read the docs
-            </Link>
-          </div>
+      <section className="pt-20 pb-16 px-6 md:px-12 lg:px-24 max-w-[1400px] mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
+          <div className="lg:col-span-2 flex flex-col items-start space-y-8">
+            <div className="inline-flex items-center rounded-full border border-zinc-100 bg-zinc-50 px-3 py-1 text-sm font-medium text-zinc-600">
+              <span className="mr-2">✨</span> Now in beta
+            </div>
 
-          <div className="space-y-4 max-w-4xl">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-zinc-900">
-              Evaliphy enables QAs to test RAG pipelines with simplicity. <br className="hidden md:block" />
+            <div className="space-y-6">
+              <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 leading-[1.1]">
+                RAG testing for <br />
+                QA engineers.
+              </h1>
+              <p className="text-xl text-zinc-600 leading-relaxed max-w-xl">
+                Evaliphy fits inside your existing test workflow. Assertions,
+                real API calls, CI reports. No ML required.
+              </p>
+            </div>
 
-            </h1>
-            <p className="text-xl text-zinc-600 leading-relaxed max-w-3xl mx-auto">
-              Evaliphy is an evaluation SDK built for QA engineers — not ML
-              researchers, not AI specialists. If you've written end-to-end
-              tests before, picking this up will feel familiar. Built-in judges,
-              real API testing, and CI-ready reports. No ML background needed,
-              no prompt wrangling, no glue code.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            <button
-              onClick={() =>
-                navigator.clipboard.writeText("npm install evaliphy")
-              }
-              className="group relative px-8 py-3 bg-zinc-900 text-white rounded-lg font-mono text-sm hover:bg-zinc-800 transition-colors flex items-center gap-2"
-            >
-              npm install -g evaliphy
-              <svg
-                className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/docs/quick-start"
+                className="px-8 py-3 bg-zinc-900 text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                />
-              </svg>
-            </button>
-            <Link
-              href="/docs/introduction"
-              className="px-8 py-3 border border-zinc-200 text-zinc-900 rounded-lg font-medium hover:bg-zinc-50 transition-colors"
-            >
-              Read the Docs
-            </Link>
+                Get Started
+              </Link>
+              <Link
+                href="https://github.com/priyanshus/evaliphy"
+                className="px-8 py-3 border border-zinc-200 text-zinc-900 rounded-lg font-medium hover:bg-zinc-50 transition-colors"
+              >
+                View on GitHub
+              </Link>
+            </div>
+          </div>
+
+          <div className="lg:col-span-3 w-full">
+            <CodeBlock code={exampleCode} filename="return-policy.eval.ts" />
           </div>
         </div>
+      </section>
 
-        {/* Code & Image Section */}
-        <div className="mt-32 flex flex-col items-center space-y-16">
-          <div className="text-center space-y-4 max-w-3xl">
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
-              If you can write a test, you can evaluate AI. It is as simple as writing Playwright for UI test.
-            </h2>
-            <p className="text-lg text-zinc-600">
-              Stop fighting with Python notebooks, complex ML metrics, and
-              brittle API calls. Evaliphy gives you a fluent, type-safe API to
-              test RAG pipelines as black boxes.
-            </p>
-          </div>
-
-          <div className="w-full max-w-4xl space-y-12">
-            {/* Code Block */}
-            <div className="rounded-xl bg-white p-1 shadow-xl border border-zinc-200 overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-2 border-b border-zinc-100 bg-zinc-50/50">
-                <div className="w-3 h-3 rounded-full bg-zinc-200" />
-                <div className="w-3 h-3 rounded-full bg-zinc-200" />
-                <div className="w-3 h-3 rounded-full bg-zinc-200" />
-                <span className="ml-2 text-xs font-mono text-zinc-400">
-                  return-policy.eval.ts
-                </span>
-              </div>
-              <pre className="p-6 overflow-x-auto text-sm font-mono leading-relaxed text-zinc-800 bg-white">
-                <code>
-                  <span className="text-indigo-600">import</span>{" "}
-                  {"{ evaluate, expect } "}{" "}
-                  <span className="text-indigo-600">from</span>{" "}
-                  <span className="text-emerald-600">'evaliphy'</span>;{"\n\n"}
-                  <span className="text-indigo-600">const</span> sample ={" "}
-                  {"{\n"}
-                  {"  query: "}{" "}
-                  <span className="text-emerald-600">
-                    "What is the return policy?"
-                  </span>
-                  ,{"\n"}
-                  {"  expectedContext: "}{" "}
-                  <span className="text-emerald-600">
-                    "Items can be returned within 30 days."
-                  </span>
-                  {"\n"}
-                  {"};\n\n"}
-                  <span className="text-indigo-600">evaluate</span>(
-                  <span className="text-emerald-600">"Return Policy Chat"</span>
-                  , <span className="text-indigo-600">async</span> (
-                  {"{ httpClient }"}) ={">"} {"{\n"}
-                  {"  // 1. Hit your RAG endpoint\n"}
-                  {"  "} <span className="text-indigo-600">const</span> res ={" "}
-                  <span className="text-indigo-600">await</span> httpClient.
-                  <span className="text-indigo-600">post</span>(
-                  <span className="text-emerald-600">'/api/chat'</span>,{" "}
-                  {"{ message: sample.query }"});{"\n"}
-                  {"  "} <span className="text-indigo-600">const</span> data ={" "}
-                  <span className="text-indigo-600">await</span> res.
-                  <span className="text-indigo-600">json</span>();{"\n\n"}
-                  {"  // 2. Assert in plain English\n"}
-                  {"  "} <span className="text-indigo-600">await</span>{" "}
-                  <span className="text-indigo-600">expect</span>({"{"}
-                  {"\n"}
-                  {"    query: sample.query,\n"}
-                  {"    response: data.answer,\n"}
-                  {"    context: data.retrieved_chunks\n"}
-                  {"  "}
-                  {"}"}).<span className="text-indigo-600">toBeFaithful</span>
-                  ();{"\n"}
-                  {"  "} <span className="text-indigo-600">await</span>{" "}
-                  <span className="text-indigo-600">expect</span>(data.answer).
-                  <span className="text-indigo-600">toBeRelevant</span>();{"\n"}
-                  {"}"});
-                </code>
-              </pre>
-            </div>
-
-            {/* Image */}
-            <div className="group relative rounded-2xl border border-zinc-200 bg-zinc-50 p-2 overflow-hidden shadow-2xl transition-all hover:shadow-zinc-200/50">
-              <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-white/90 backdrop-blur rounded-full text-xs font-medium text-zinc-500 border border-zinc-100 shadow-sm">
-                Evaluation Report
-              </div>
-              <Image
-                src="/images/report.png"
-                alt="Evaliphy Report Screenshot"
-                loading="eager"
-                width={1200}
-                height={800}
-                className="rounded-xl object-cover w-full h-auto"
-              />
+      {/* Social Proof Bar */}
+      <section className="py-12 border-y border-zinc-100 bg-zinc-50/30">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+            <span className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+              Works with
+            </span>
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-50 grayscale">
+              <span className="text-xl font-bold text-zinc-900">OpenAI</span>
+              <span className="text-xl font-bold text-zinc-900">Anthropic</span>
+              <span className="text-xl font-bold text-zinc-900">OpenRouter</span>
+              <span className="text-xl font-bold text-zinc-900">Mistral</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Evaliphy Report Section */}
+      <section className="py-24 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full">
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
+            Human-readable evaluation reports
+          </h2>
+          <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
+            Get detailed, human-readable reports with LLM-judge reasoning.
+          </p>
+        </div>
+
+        <div className="relative rounded-2xl border border-zinc-200 bg-zinc-50 p-2 overflow-hidden shadow-2xl">
+          <Image
+            src="/images/report.png"
+            alt="Evaliphy Evaluation Report"
+            width={1200}
+            height={800}
+            className="rounded-xl object-cover w-full h-auto"
+          />
         </div>
       </section>
 
@@ -283,115 +238,79 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Architecture Section */}
+      {/* Comparison Section */}
       <section className="py-24 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
-            Two-Phase Architecture. Infinite Reliability.
+            Built for QA, not Research
           </h2>
+          <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
+            Evaliphy is the only evaluation framework that treats RAG as a black box.
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div className="space-y-4">
-            <div className="text-4xl font-bold text-zinc-100">01</div>
-            <h3 className="text-xl font-semibold text-zinc-900">
-              Configure Once
-            </h3>
-            <p className="text-zinc-600">
-              Set your LLM judge models (e.g.,{" "}
-              <code className="text-sm">gpt-4o-mini</code>) and confidence
-              thresholds globally in{" "}
-              <code className="text-sm">evaliphy.config.ts</code>.
-            </p>
-          </div>
-          <div className="space-y-4">
-            <div className="text-4xl font-bold text-zinc-100">02</div>
-            <h3 className="text-xl font-semibold text-zinc-900">
-              Collect & Execute
-            </h3>
-            <p className="text-zinc-600">
-              Evaliphy builds a deterministic test tree, then executes your HTTP
-              calls and RAG pipelines in parallel.
-            </p>
-          </div>
-          <div className="space-y-4">
-            <div className="text-4xl font-bold text-zinc-100">03</div>
-            <h3 className="text-xl font-semibold text-zinc-900">
-              Evaluate & Report
-            </h3>
-            <p className="text-zinc-600">
-              The built-in LLM judge evaluates the responses against your
-              assertions and returns human-readable failure reasons.
-            </p>
-          </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-zinc-100">
+                <th className="py-4 px-6 text-left text-sm font-semibold text-zinc-900">Feature</th>
+                <th className="py-4 px-6 text-center text-sm font-semibold text-zinc-900 bg-zinc-50/50">Evaliphy</th>
+                <th className="py-4 px-6 text-center text-sm font-semibold text-zinc-500">DeepEval / Ragas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-zinc-100">
+                <td className="py-4 px-6 text-sm text-zinc-600">Primary Audience</td>
+                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">QA & Software Engineers</td>
+                <td className="py-4 px-6 text-center text-sm text-zinc-500">Data Scientists</td>
+              </tr>
+              <tr className="border-b border-zinc-100">
+                <td className="py-4 px-6 text-sm text-zinc-600">Language</td>
+                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">TypeScript / Node.js</td>
+                <td className="py-4 px-6 text-center text-sm text-zinc-500">Python</td>
+              </tr>
+              <tr className="border-b border-zinc-100">
+                <td className="py-4 px-6 text-sm text-zinc-600">Testing Style</td>
+                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">Black-box (API-driven)</td>
+                <td className="py-4 px-6 text-center text-sm text-zinc-500">White-box (Pipeline-driven)</td>
+              </tr>
+              <tr className="border-b border-zinc-100">
+                <td className="py-4 px-6 text-sm text-zinc-600">Integration</td>
+                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">CI/CD Ready (npx)</td>
+                <td className="py-4 px-6 text-center text-sm text-zinc-500">Notebooks / Python Scripts</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
-      {/* Beta Section */}
+      {/* Final CTA Section */}
       <section className="py-24 bg-zinc-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <h2 className="text-4xl font-bold">Join the Beta Program</h2>
-              <p className="text-zinc-400 text-lg">
-                We are currently in open beta. We’re looking for QA teams and
-                software engineers building RAG applications to help us refine
-                the API and expand our matcher library.
-              </p>
-              <ul className="space-y-4">
-                {[
-                  "Free for commercial use during Beta",
-                  "Direct access to the core engineering team",
-                  "Influence the v1.0 roadmap",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <svg
-                      className="w-5 h-5 text-zinc-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex gap-4">
-                <a
-                  href="https://github.com/priyanshus/evaliphy"
-                  className="px-8 py-3 bg-white text-zinc-900 rounded-lg font-medium hover:bg-zinc-100 transition-colors"
-                >
-                  Star on GitHub
-                </a>
-                <button className="px-8 py-3 border border-zinc-700 text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors">
-                  Join the Discord
-                </button>
-              </div>
-            </div>
-            <div className="bg-zinc-800/50 rounded-2xl p-8 border border-zinc-700">
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold">
-                  Ready to test your RAG pipeline?
-                </h3>
-                <p className="text-zinc-400">
-                  Start evaluating your AI in under 5 minutes.
-                </p>
-                <div className="bg-black rounded-lg p-4 font-mono text-sm text-zinc-300 space-y-2">
-                  <div className="flex gap-2">
-                    <span className="text-zinc-500">$</span>
-                    <span>npm install -g evaliphy</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-zinc-500">$</span>
-                    <span>npx evaliphy init</span>
-                  </div>
-                </div>
-              </div>
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 text-center space-y-8">
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Ready to test your RAG pipeline?
+          </h2>
+          <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
+            Join the open beta and start evaluating your AI in under 5 minutes.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/docs/quick-start"
+              className="px-8 py-3 bg-white text-zinc-900 rounded-lg font-medium hover:bg-zinc-100 transition-colors"
+            >
+              Get Started Now
+            </Link>
+            <Link
+              href="https://github.com/priyanshus/evaliphy"
+              className="px-8 py-3 border border-zinc-700 text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors"
+            >
+              Star on GitHub
+            </Link>
+          </div>
+          <div className="pt-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800 rounded-lg font-mono text-sm text-zinc-300">
+              <span className="text-zinc-500">$</span>
+              <span>npm install -g evaliphy</span>
             </div>
           </div>
         </div>
