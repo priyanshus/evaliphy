@@ -122,8 +122,8 @@ We are currently in open beta and looking for feedback from QA teams and enginee
 - ✅ **Influence** the v1.0 roadmap.
 - ✅ **Contribute** to our growing library of matchers.
 
-[Documentation](https://evaliphy.com) | [GitHub](https://github.com/priyanshus/evaliphy) | [Submit Feedback](https://forms.gle/9ztrqUCXUg2YGSJJA)
+[Documentation](https://evaliphy.com) | [GitHub](https://github.com/evaliphy/evaliphy) | [Submit Feedback](https://forms.gle/9ztrqUCXUg2YGSJJA)
 
 ## 📄 License
 
-MIT © [Evaliphy](https://github.com/priyanshus/evaliphy)
+MIT © [Evaliphy](https://github.com/evaliphy/evaliphy)
