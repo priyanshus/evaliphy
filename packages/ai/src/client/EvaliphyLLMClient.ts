@@ -58,7 +58,7 @@ export class EvaliphyLLMClient implements ILLMClient {
         prompt,
         output: Output.object({ schema }),
         temperature: this.config.temperature,
-        maxTokens: this.config.maxTokens,
+        // Note: maxTokens is not supported in the Output.object overload of generateText
         abortSignal: this.config.timeout
           ? AbortSignal.timeout(this.config.timeout)
           : undefined,
